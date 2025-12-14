@@ -1,0 +1,813 @@
+// mobile-pwa.js - Progressive Web App for Mobile
+import fs from 'fs';
+import path from'path';
+
+// Generate PWA files
+const pwaFiles = {
+  'index.html': `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#4a6ee0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Dolphin Mobile</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        :root {
+            --primary: #4a6ee0;
+            --secondary: #667eea;
+            --background: #f8f9fa;
+            --card: #ffffff;
+            --text: #333333;
+            --text-secondary: #666666;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #121212;
+                --card: #1e1e1e;
+                --text: #ffffff;
+                --text-secondary: #aaaaaa;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            overscroll-behavior: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+        }
+        
+        /* Safe area for iPhone X+ */
+        .safe-area {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+        
+        /* Mobile app container */
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--background);
+        }
+        
+        /* Status Bar (iOS style) */
+        .status-bar {
+            height: 44px;
+            background: var(--card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .status-bar.dark {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Header */
+        .app-header {
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .app-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .app-subtitle {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        /* Content */
+        .content {
+            padding: 20px;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        
+        .card:active {
+            transform: scale(0.98);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Counter */
+        .counter-display {
+            text-align: center;
+            font-size: 72px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 20px 0;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            user-select: none;
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: rgba(74, 110, 224, 0.1);
+            color: var(--primary);
+        }
+        
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .feature-btn {
+            background: rgba(74, 110, 224, 0.1);
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .feature-btn:active {
+            background: rgba(74, 110, 224, 0.2);
+            transform: scale(0.95);
+        }
+        
+        .feature-icon {
+            font-size: 32px;
+        }
+        
+        .feature-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            display: flex;
+            padding: 10px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .bottom-nav.dark {
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            border-radius: 10px;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(74, 110, 224, 0.1);
+        }
+        
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Swipe Indicator (for mobile gestures) */
+        .swipe-indicator {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+        
+        /* Touch Feedback */
+        .touch-feedback {
+            position: absolute;
+            background: rgba(74, 110, 224, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            .btn-secondary {
+                background: rgba(255,255,255,0.1);
+            }
+            
+            .feature-btn {
+                background: rgba(255,255,255,0.1);
+            }
+            
+            .feature-btn:active {
+                background: rgba(255,255,255,0.2);
+            }
+        }
+        
+        /* Mobile-specific optimizations */
+        @media (max-width: 768px) {
+            .counter-display {
+                font-size: 64px;
+            }
+            
+            .btn {
+                padding: 14px;
+            }
+        }
+        
+        /* Prevent text selection */
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="no-select">
+    <div class="app-container">
+        <!-- Status Bar -->
+        <div class="status-bar safe-area" id="statusBar">
+            <span id="time">9:41</span>
+            <span>📶 4G</span>
+            <span>🔋 <span id="battery">85</span>%</span>
+        </div>
+        
+        <!-- App Header -->
+        <header class="app-header">
+            <h1 class="app-title">🐬 Dolphin Mobile</h1>
+            <p class="app-subtitle">Universal JSX Framework</p>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Counter Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>🎯</span>
+                    <span>Interactive Counter</span>
+                </div>
+                <div class="counter-display" id="counter">0</div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="decrement()">
+                        <span>➖</span>
+                        <span>Decrement</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="increment()">
+                        <span>➕</span>
+                        <span>Increment</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Features Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>⚡</span>
+                    <span>Mobile Features</span>
+                </div>
+                <div class="features-grid">
+                    <button class="feature-btn" onclick="toggleTheme()">
+                        <span class="feature-icon">🌓</span>
+                        <span class="feature-label">Theme</span>
+                    </button>
+                    <button class="feature-btn" onclick="vibrate()">
+                        <span class="feature-icon">📳</span>
+                        <span class="feature-label">Vibrate</span>
+                    </button>
+                    <button class="feature-btn" onclick="shareApp()">
+                        <span class="feature-icon">📤</span>
+                        <span class="feature-label">Share</span>
+                    </button>
+                    <button class="feature-btn" onclick="getLocation()">
+                        <span class="feature-icon">📍</span>
+                        <span class="feature-label">Location</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- System Info Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>📱</span>
+                    <span>Device Information</span>
+                </div>
+                <div id="deviceInfo">
+                    <p>Loading device info...</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav safe-area" id="bottomNav">
+            <a href="#" class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-label">Explore</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Settings</span>
+            </a>
+        </nav>
+        
+        <!-- Swipe Hint -->
+        <div class="swipe-indicator">
+            👆 Try swiping up
+        </div>
+    </div>
+    
+    <script>
+        // App State
+        let count = 0;
+        let isDarkMode = false;
+        
+        // DOM Elements
+        const counterEl = document.getElementById('counter');
+        const statusBar = document.getElementById('statusBar');
+        const bottomNav = document.getElementById('bottomNav');
+        const deviceInfoEl = document.getElementById('deviceInfo');
+        const timeEl = document.getElementById('time');
+        const batteryEl = document.getElementById('battery');
+        
+        // Initialize
+        function init() {
+            updateTime();
+            updateBattery();
+            detectDevice();
+            setupTouchFeedback();
+            setupSwipeGestures();
+            
+            // Update time every minute
+            setInterval(updateTime, 60000);
+            setInterval(updateBattery, 30000);
+            
+            console.log('📱 Dolphin Mobile App initialized');
+        }
+        
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            timeEl.textContent = time;
+        }
+        
+        // Simulate battery status
+        function updateBattery() {
+            const battery = Math.floor(Math.random() * 20) + 80; // 80-100%
+            batteryEl.textContent = battery;
+        }
+        
+        // Detect device info
+        function detectDevice() {
+            const info = \`
+                <p><strong>Platform:</strong> \${navigator.platform}</p>
+                <p><strong>User Agent:</strong> \${navigator.userAgent}</p>
+                <p><strong>Screen:</strong> \${window.screen.width}x\${window.screen.height}</p>
+                <p><strong>Touch:</strong> \${'ontouchstart' in window ? 'Yes' : 'No'}</p>
+                <p><strong>Online:</strong> \${navigator.onLine ? '🟢 Online' : '🔴 Offline'}</p>
+            \`;
+            deviceInfoEl.innerHTML = info;
+        }
+        
+        // Counter functions
+        function increment() {
+            count++;
+            counterEl.textContent = count;
+            createTouchFeedback(event);
+            playClickSound();
+        }
+        
+        function decrement() {
+            count--;
+            counterEl.textContent = count;
+            createTouchFeedback(event);
+            playClickSound();
+        }
+        
+        // Toggle theme
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark', isDarkMode);
+            statusBar.classList.toggle('dark', isDarkMode);
+            bottomNav.classList.toggle('dark', isDarkMode);
+            createTouchFeedback(event);
+            
+            // Save preference
+            localStorage.setItem('darkMode', isDarkMode);
+            console.log(\`🌓 Theme: \${isDarkMode ? 'Dark' : 'Light'}\`);
+        }
+        
+        // Mobile vibration (if supported)
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+                console.log('📳 Vibrated!');
+            } else {
+                console.log('⚠️ Vibration not supported');
+                alert('Vibration not supported on this device');
+            }
+            createTouchFeedback(event);
+        }
+        
+        // Share functionality
+        function shareApp() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Dolphin Mobile',
+                    text: 'Check out this awesome mobile app built with DolphinJS!',
+                    url: window.location.href
+                });
+            } else {
+                console.log('📤 Share API not supported');
+                alert('Sharing not supported on this device');
+            }
+            createTouchFeedback(event);
+        }
+        
+        // Get location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        alert(\`📍 Location: \${position.coords.latitude}, \${position.coords.longitude}\`);
+                        console.log('📍 Location obtained');
+                    },
+                    (error) => {
+                        console.error('📍 Location error:', error);
+                        alert('Could not get location');
+                    }
+                );
+            } else {
+                alert('Geolocation not supported');
+            }
+            createTouchFeedback(event);
+        }
+        
+        // Touch feedback animation
+        function createTouchFeedback(event) {
+            const x = event.clientX || event.touches[0].clientX;
+            const y = event.clientY || event.touches[0].clientY;
+            
+            const feedback = document.createElement('div');
+            feedback.className = 'touch-feedback';
+            feedback.style.left = \`\${x}px\`;
+            feedback.style.top = \`\${y}px\`;
+            
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 600);
+        }
+        
+        // Setup touch feedback for all buttons
+        function setupTouchFeedback() {
+            document.querySelectorAll('button, .nav-item, .card').forEach(el => {
+                el.addEventListener('touchstart', createTouchFeedback);
+                el.addEventListener('mousedown', createTouchFeedback);
+            });
+        }
+        
+        // Setup swipe gestures
+        function setupSwipeGestures() {
+            let startY;
+            
+            document.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                const endY = e.changedTouches[0].clientY;
+                const diff = startY - endY;
+                
+                if (diff > 50) { // Swipe up
+                    console.log('👆 Swiped up');
+                    document.querySelector('.swipe-indicator').style.display = 'none';
+                } else if (diff < -50) { // Swipe down
+                    console.log('👇 Swiped down');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+        
+        // Play click sound (optional)
+        function playClickSound() {
+            // Could add sound here
+        }
+        
+        // PWA Installation
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(() => console.log('✅ Service Worker registered'))
+                    .catch(err => console.error('❌ Service Worker error:', err));
+            });
+        }
+        
+        // Initialize app
+        window.addEventListener('DOMContentLoaded', init);
+        
+        // Add to home screen prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button
+            setTimeout(() => {
+                if (confirm('Add Dolphin Mobile to home screen?')) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(() => {
+                        deferredPrompt = null;
+                    });
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
+`,
+
+  'manifest.json': `{
+  "name": "Dolphin Mobile",
+  "short_name": "Dolphin",
+  "description": "Universal JSX Framework Mobile App",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#4a6ee0",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "orientation": "portrait",
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Open Counter",
+      "short_name": "Counter",
+      "description": "Open counter feature",
+      "url": "/#counter"
+    }
+  ]
+}`,
+
+  'sw.js': `// Service Worker for PWA
+const CACHE_NAME = 'dolphin-mobile-v1.0';
+const urlsToCache = [
+  './',
+  './index.html',
+  './manifest.json'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(key => {
+        if (key !== CACHE_NAME) {
+          return caches.delete(key);
+        }
+      }))
+    )
+  );
+});`
+};
+
+// Create mobile directory
+const mobileDir = './mobile-pwa';
+if (!fs.existsSync(mobileDir)) {
+  fs.mkdirSync(mobileDir, { recursive: true });
+}
+
+// Write files
+Object.entries(pwaFiles).forEach(([filename, content]) => {
+  fs.writeFileSync(path.join(mobileDir, filename), content);
+});
+
+// Create a simple HTTP server
+const serverCode = `
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+const PORT = 3000;
+const MOBILE_DIR = './mobile-pwa';
+
+const server = http.createServer((req, res) => {
+  let filePath = path.join(MOBILE_DIR, req.url === '/' ? 'index.html' : req.url);
+  
+  const extname = path.extname(filePath);
+  let contentType = 'text/html';
+  
+  switch (extname) {
+    case '.js':
+      contentType = 'text/javascript';
+      break;
+    case '.json':
+      contentType = 'application/json';
+      break;
+    case '.png':
+      contentType = 'image/png';
+      break;
+  }
+  
+  fs.readFile(filePath, (error, content) => {
+    if (error) {
+      if (error.code === 'ENOENT') {
+        fs.readFile(path.join(MOBILE_DIR, 'index.html'), (err, content) => {
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end(content, 'utf-8');
+        });
+      } else {
+        res.writeHead(500);
+        res.end('Server Error: ' + error.code);
+      }
+    } else {
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(content, 'utf-8');
+    }
+  });
+});
+
+server.listen(PORT, () => {
+  console.log('📱 Mobile PWA Server running at:');
+  console.log('   Local:  http://localhost:' + PORT);
+  console.log('   Network: http://' + require('os').networkInterfaces().eth0?.[0]?.address + ':' + PORT);
+  console.log('\\n📱 Open on Mobile:');
+  console.log('   1. Connect phone to same WiFi');
+  console.log('   2. Open browser on phone');
+  console.log('   3. Go to the Network URL above');
+  console.log('\\n📱 Or scan QR code with phone camera');
+});
+
+// Generate QR code
+const qrcode = require('qrcode-terminal');
+const address = require('ip').address();
+qrcode.generate('http://' + address + ':' + PORT);
+`;
+
+fs.writeFileSync(path.join(mobileDir, 'server.js'), serverCode);
+
+console.log(`
+✅ Mobile PWA created in: ${mobileDir}
+
+📱 To run on mobile:
+
+OPTION 1: Local Server
+1. cd ${mobileDir}
+2. npm install ip qrcode-terminal
+3. node server.js
+4. Open http://localhost:3000 on your phone (same WiFi)
+
+OPTION 2: Direct Phone Access
+1. Open ${mobileDir}/index.html in browser
+2. Save to home screen (iOS: Share → Add to Home Screen, Android: Menu → Add to Home)
+
+OPTION 3: Deploy Online
+1. Upload ${mobileDir} to GitHub Pages, Netlify, or Vercel
+2. Share the URL with your phone
+
+📱 Mobile Features:
+• Installable PWA (Add to Home Screen)
+• Touch-optimized UI
+• Dark mode support
+• Vibration API
+• Share API
+• Location API
+• Service Worker (Offline support)
+• Swipe gestures
+• Native-like animations
+`);

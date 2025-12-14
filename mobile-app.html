@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐬 Dolphin Mobile</title>
+    <style>
+        :root {
+            --primary: #4a6ee0;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --radius: 16px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #121212;
+                --card: #1e1e1e;
+                --text: #ffffff;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 16px;
+            font-size: 15px;
+            font-weight: 600;
+            background: var(--card);
+            border-radius: 0 0 var(--radius) var(--radius);
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+        
+        .header {
+            text-align: center;
+            padding: 32px 20px;
+            background: linear-gradient(135deg, var(--primary), #667eea);
+            color: white;
+            border-radius: var(--radius);
+            margin: 0 16px 24px 16px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 0 16px;
+            padding-bottom: 80px;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .counter {
+            font-size: 72px;
+            font-weight: 800;
+            text-align: center;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn.secondary {
+            background: rgba(74, 110, 224, 0.1);
+            color: var(--primary);
+        }
+        
+        .btn.danger {
+            background: #ff4757;
+            color: white;
+        }
+        
+        .btn.warning {
+            background: #ffa502;
+            color: white;
+        }
+        
+        .btn.success {
+            background: #2ed573;
+            color: white;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .feature-btn {
+            background: rgba(74, 110, 224, 0.1);
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .feature-btn:active {
+            background: rgba(74, 110, 224, 0.2);
+            transform: scale(0.95);
+        }
+        
+        .feature-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .feature-icon {
+            font-size: 28px;
+        }
+        
+        .feature-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Flashlight indicator */
+        .flashlight-status {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .flashlight-icon {
+            font-size: 64px;
+            margin: 10px 0;
+            animation: pulse 2s infinite;
+        }
+        
+        .flashlight-icon.on {
+            color: #ffdd59;
+            text-shadow: 0 0 20px #ffdd59;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            display: flex;
+            padding: 12px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            color: #666;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(74, 110, 224, 0.1);
+        }
+        
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .nav-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Permission status */
+        .permission-status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .permission-status.granted {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+        }
+        
+        .permission-status.denied {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+        }
+        
+        .permission-status.pending {
+            background: rgba(255, 165, 2, 0.2);
+            color: #ffa502;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span id="time">9:41</span>
+            <span>📱 DolphinJS</span>
+            <span id="battery">🔋 85%</span>
+        </div>
+        
+        <!-- Header -->
+        <div class="header">
+            <h1>🐬 Dolphin</h1>
+            <p>Universal JSX Framework</p>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Counter Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>🎯</span>
+                    <span>Interactive Counter</span>
+                </div>
+                <div class="counter" id="counter">0</div>
+                <div class="buttons">
+                    <button class="btn secondary" onclick="decrement()">
+                        <span>➖</span>
+                        <span>Decrease</span>
+                    </button>
+                    <button class="btn primary" onclick="increment()">
+                        <span>➕</span>
+                        <span>Increase</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Flashlight Control Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>🔦</span>
+                    <span>Flashlight Control</span>
+                </div>
+                
+                <!-- Flashlight Status -->
+                <div class="flashlight-status" id="flashlightStatus">
+                    <div class="flashlight-icon" id="flashlightIcon">🔦</div>
+                    <div id="flashlightText">Flashlight is OFF</div>
+                </div>
+                
+                <!-- Flashlight Controls -->
+                <div class="buttons">
+                    <button class="btn success" onclick="toggleFlashlight()" id="flashlightBtn">
+                        <span>🔦</span>
+                        <span>Toggle Flashlight</span>
+                    </button>
+                    <button class="btn warning" onclick="strobeFlashlight()" id="strobeBtn">
+                        <span>⚡</span>
+                        <span>Strobe Effect</span>
+                    </button>
+                </div>
+                
+                <!-- Permission Status -->
+                <div class="permission-status" id="permissionStatus">
+                    Checking camera permission...
+                </div>
+            </div>
+            
+            <!-- Features Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>⚡</span>
+                    <span>Mobile Features</span>
+                </div>
+                <div class="features">
+                    <button class="feature-btn" onclick="vibrate()">
+                        <span class="feature-icon">📳</span>
+                        <span class="feature-text">Vibrate</span>
+                    </button>
+                    <button class="feature-btn" onclick="share()">
+                        <span class="feature-icon">📤</span>
+                        <span class="feature-text">Share</span>
+                    </button>
+                    <button class="feature-btn" onclick="getLocation()">
+                        <span class="feature-icon">📍</span>
+                        <span class="feature-text">Location</span>
+                    </button>
+                    <button class="feature-btn" onclick="toggleTheme()">
+                        <span class="feature-icon">🌓</span>
+                        <span class="feature-text">Theme</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Info Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>📱</span>
+                    <span>Device Info</span>
+                </div>
+                <div id="deviceInfo">
+                    <p>Loading device information...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <a href="#" class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">Home</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">🔦</span>
+                <span class="nav-text">Flash</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Stats</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">Settings</span>
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // App State
+        let count = 0;
+        let isDark = false;
+        let isFlashlightOn = false;
+        let strobeInterval = null;
+        let mediaStream = null;
+        
+        // DOM Elements
+        const counterEl = document.getElementById('counter');
+        const timeEl = document.getElementById('time');
+        const batteryEl = document.getElementById('battery');
+        const deviceInfoEl = document.getElementById('deviceInfo');
+        const flashlightIcon = document.getElementById('flashlightIcon');
+        const flashlightText = document.getElementById('flashlightText');
+        const flashlightBtn = document.getElementById('flashlightBtn');
+        const strobeBtn = document.getElementById('strobeBtn');
+        const permissionStatus = document.getElementById('permissionStatus');
+        const flashlightStatus = document.getElementById('flashlightStatus');
+        
+        // Initialize
+        function init() {
+            updateTime();
+            updateBattery();
+            updateDeviceInfo();
+            checkCameraPermission();
+            
+            setInterval(updateTime, 60000);
+            setInterval(updateBattery, 30000);
+            
+            const savedTheme = localStorage.getItem('dolphin-theme');
+            if (savedTheme === 'dark') {
+                enableDarkMode();
+            }
+            
+            console.log('📱 Dolphin Mobile App Initialized');
+        }
+        
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            timeEl.textContent = time;
+        }
+        
+        // Simulate battery update
+        function updateBattery() {
+            const battery = Math.floor(Math.random() * 20) + 80;
+            batteryEl.textContent = '🔋 ' + battery + '%';
+        }
+        
+        // Update device info
+        function updateDeviceInfo() {
+            const platform = navigator.platform || 'Unknown';
+            const screenSize = screen.width + 'x' + screen.height;
+            const hasTouch = 'ontouchstart' in window ? 'Yes ✓' : 'No ✗';
+            const isOnline = navigator.onLine ? 'Yes ✓' : 'No ✗';
+            const hasFlashlight = 'mediaDevices' in navigator ? 'Yes ✓' : 'No ✗';
+            
+            const info = `
+                <p><strong>Platform:</strong> ${platform}</p>
+                <p><strong>Screen:</strong> ${screenSize}</p>
+                <p><strong>Touch:</strong> ${hasTouch}</p>
+                <p><strong>Online:</strong> ${isOnline}</p>
+                <p><strong>Flashlight:</strong> ${hasFlashlight}</p>
+            `;
+            deviceInfoEl.innerHTML = info;
+        }
+        
+        // Check camera permission for flashlight
+        async function checkCameraPermission() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    permissionStatus.textContent = 'Flashlight not supported on this device';
+                    permissionStatus.className = 'permission-status denied';
+                    flashlightBtn.disabled = true;
+                    strobeBtn.disabled = true;
+                    return;
+                }
+                
+                const permissionStatusResult = await navigator.permissions.query({ name: 'camera' });
+                
+                if (permissionStatusResult.state === 'granted') {
+                    permissionStatus.textContent = '✅ Camera permission granted';
+                    permissionStatus.className = 'permission-status granted';
+                } else if (permissionStatusResult.state === 'denied') {
+                    permissionStatus.textContent = '❌ Camera permission denied. Please enable in browser settings.';
+                    permissionStatus.className = 'permission-status denied';
+                } else {
+                    permissionStatus.textContent = '⚠️ Camera permission pending...';
+                    permissionStatus.className = 'permission-status pending';
+                }
+                
+                permissionStatusResult.onchange = function() {
+                    checkCameraPermission();
+                };
+                
+            } catch (error) {
+                console.error('Permission check error:', error);
+                permissionStatus.textContent = 'Unable to check camera permission';
+                permissionStatus.className = 'permission-status denied';
+            }
+        }
+        
+        // Toggle flashlight
+        async function toggleFlashlight() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert('Flashlight not supported on this device');
+                    return;
+                }
+                
+                if (strobeInterval) {
+                    clearInterval(strobeInterval);
+                    strobeInterval = null;
+                    strobeBtn.innerHTML = '<span>⚡</span><span>Strobe Effect</span>';
+                }
+                
+                if (!isFlashlightOn) {
+                    // Turn flashlight ON
+                    mediaStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'environment',
+                            torch: true
+                        }
+                    });
+                    
+                    const track = mediaStream.getVideoTracks()[0];
+                    await track.applyConstraints({
+                        advanced: [{ torch: true }]
+                    });
+                    
+                    isFlashlightOn = true;
+                    flashlightIcon.textContent = '🔆';
+                    flashlightIcon.className = 'flashlight-icon on';
+                    flashlightText.textContent = 'Flashlight is ON';
+                    flashlightBtn.innerHTML = '<span>🔦</span><span>Turn OFF</span>';
+                    flashlightBtn.className = 'btn danger';
+                    
+                    playHaptic();
+                    
+                } else {
+                    // Turn flashlight OFF
+                    if (mediaStream) {
+                        const track = mediaStream.getVideoTracks()[0];
+                        await track.applyConstraints({
+                            advanced: [{ torch: false }]
+                        });
+                        track.stop();
+                        mediaStream = null;
+                    }
+                    
+                    isFlashlightOn = false;
+                    flashlightIcon.textContent = '🔦';
+                    flashlightIcon.className = 'flashlight-icon';
+                    flashlightText.textContent = 'Flashlight is OFF';
+                    flashlightBtn.innerHTML = '<span>🔦</span><span>Turn ON</span>';
+                    flashlightBtn.className = 'btn success';
+                    
+                    playHaptic();
+                }
+                
+            } catch (error) {
+                console.error('Flashlight error:', error);
+                permissionStatus.textContent = '❌ Flashlight error: ' + error.message;
+                permissionStatus.className = 'permission-status denied';
+                
+                if (error.name === 'NotAllowedError') {
+                    alert('Camera permission required for flashlight. Please allow camera access.');
+                } else if (error.name === 'NotFoundError') {
+                    alert('No camera with flashlight found on this device.');
+                } else {
+                    alert('Flashlight not supported: ' + error.message);
+                }
+            }
+        }
+        
+        // Strobe flashlight effect
+        async function strobeFlashlight() {
+            if (strobeInterval) {
+                // Stop strobe
+                clearInterval(strobeInterval);
+                strobeInterval = null;
+                strobeBtn.innerHTML = '<span>⚡</span><span>Strobe Effect</span>';
+                strobeBtn.className = 'btn warning';
+                
+                // Ensure flashlight is off
+                if (mediaStream && isFlashlightOn) {
+                    await toggleFlashlight();
+                }
+                return;
+            }
+            
+            // Start strobe
+            if (!isFlashlightOn) {
+                await toggleFlashlight();
+            }
+            
+            let strobeState = true;
+            strobeBtn.innerHTML = '<span>⏹️</span><span>Stop Strobe</span>';
+            strobeBtn.className = 'btn danger';
+            
+            strobeInterval = setInterval(async () => {
+                try {
+                    if (mediaStream) {
+                        const track = mediaStream.getVideoTracks()[0];
+                        await track.applyConstraints({
+                            advanced: [{ torch: strobeState }]
+                        });
+                        
+                        strobeState = !strobeState;
+                        
+                        // Visual feedback
+                        flashlightIcon.style.opacity = strobeState ? '1' : '0.3';
+                    }
+                } catch (error) {
+                    console.error('Strobe error:', error);
+                    clearInterval(strobeInterval);
+                    strobeInterval = null;
+                }
+            }, 200); // 200ms strobe interval
+        }
+        
+        // Counter functions
+        function increment() {
+            count++;
+            counterEl.textContent = count;
+            playHaptic();
+        }
+        
+        function decrement() {
+            count--;
+            counterEl.textContent = count;
+            playHaptic();
+        }
+        
+        // Mobile vibration
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+                console.log('📳 Vibrated');
+            } else {
+                alert('Vibration not supported');
+            }
+            playHaptic();
+        }
+        
+        // Share functionality
+        function share() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Dolphin Mobile',
+                    text: 'Check out this mobile app with flashlight control!',
+                    url: window.location.href
+                });
+            } else {
+                alert('Share not supported in this browser');
+            }
+            playHaptic();
+        }
+        
+        // Get location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(pos) {
+                        alert('📍 Location: ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4));
+                    },
+                    function(err) {
+                        alert('Could not get location');
+                    }
+                );
+            } else {
+                alert('Geolocation not supported');
+            }
+            playHaptic();
+        }
+        
+        // Toggle theme
+        function toggleTheme() {
+            isDark = !isDark;
+            if (isDark) {
+                enableDarkMode();
+                localStorage.setItem('dolphin-theme', 'dark');
+            } else {
+                disableDarkMode();
+                localStorage.setItem('dolphin-theme', 'light');
+            }
+            playHaptic();
+        }
+        
+        function enableDarkMode() {
+            document.documentElement.style.setProperty('--bg', '#121212');
+            document.documentElement.style.setProperty('--card', '#1e1e1e');
+            document.documentElement.style.setProperty('--text', '#ffffff');
+            isDark = true;
+        }
+        
+        function disableDarkMode() {
+            document.documentElement.style.setProperty('--bg', '#f8f9fa');
+            document.documentElement.style.setProperty('--card', '#ffffff');
+            document.documentElement.style.setProperty('--text', '#1a1a1a');
+            isDark = false;
+        }
+        
+        // Haptic feedback
+        function playHaptic() {
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
+            }
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (mediaStream) {
+                const track = mediaStream.getVideoTracks()[0];
+                track.stop();
+                mediaStream = null;
+            }
+            if (strobeInterval) {
+                clearInterval(strobeInterval);
+            }
+        });
+        
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
